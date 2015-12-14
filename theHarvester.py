@@ -75,7 +75,7 @@ class TheHarvester:
             print "[+] Scraping any emails from: " + url
             request = urllib2.Request(url)
             response = urllib2.urlopen(request)
-            emails = re.findall(r"[a-z0-9\.\-+_]+@[a-zA-Z0-9.-]*" + self.domain, response.read(), re.I)
+            emails = re.findall(r"[a-z0-9_.+-]+@[a-z0-9-.]*" + self.domain, response.read(), re.I)
             if emails:
                 for e in emails:
                     self.allEmails.append(e)
