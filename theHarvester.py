@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import google  # https://pypi.python.org/pypi/google
+import random
 import re
 import socket
 import sys
@@ -10,7 +11,8 @@ import urllib2
 
 class TheHarvester:
 
-    def __init__(self, dataSource, domain, searchMax, saveEmails, delay, urlTimeout):
+    def __init__(self, active, dataSource, domain, searchMax, saveEmails, delay, urlTimeout):
+        self.active = active
         self.dataSource = dataSource
         self.domain = domain
         
@@ -52,19 +54,22 @@ class TheHarvester:
 
     def google_search(self):
         # Retrieve pages based on domain search query
-        print "[*] Searching for email addresses in " + str(self.searchMax) + " pages and waiting " + str(self.delay) + " seconds between searches"
+        print "[*] Searching for email addresses in " + str(self.searchMax) + " sites and waiting " + str(self.delay) + " seconds between searches"
         
         # Search for emails not within the domain's site (-site:<domain>)
         query = self.domain + " -site:" + self.domain
-        print "[*] Searching for emails not within the domain's site: " + query
+        print "[*] Searching for emails NOT within the domain's site (passive): " + query
         for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
             self.find_emails(url)  
             
         # Search for emails within the domain's site (site:<domain>)
-        query = "site:" + self.domain
-        print "[*] Searching for emails within the domain's site: " + query
-        for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
-            self.find_emails(url)         
+        if self.active:
+            query = "site:" + self.domain
+            print "[*] Searching for emails within the domain's sites (active): " + self.domain
+            for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
+                self.find_emails(url)         
+        else:
+            print "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*." + self.domain + ")"
 
     def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
@@ -74,6 +79,7 @@ class TheHarvester:
         try:
             print "[+] Scraping any emails from: " + url
             request = urllib2.Request(url)
+            request.add_header('User-agent', 'Mozilla/5.0')
             response = urllib2.urlopen(request)
             emails = re.findall(r"[a-z0-9_.+-]+@[a-z0-9-.]*" + self.domain, response.read(), re.I)
             if emails:
@@ -102,6 +108,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='theHarvester2')
     dataSources = ['all', 'google', 'pgp']
+    parser.add_argument('-a', dest='active', action='store_true', default=False, help='Conduct an active search (potentially scrape target domain and sub-domains)')
     parser.add_argument('-b', dest='dataSource', action='store', required=True, help='Specify data source (' + ', '.join(dataSources) + ')')
     parser.add_argument('-d', dest='domain', action='store', required=True, help='Domain to search')
     parser.add_argument('-l', dest='searchMax', action='store', type=int, default=100, help='Maximum results to search (default and minimum is 100)')
