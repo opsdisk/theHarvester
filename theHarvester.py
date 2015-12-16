@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import argparse
 import google  # https://pypi.python.org/pypi/google
-import random
 import re
 import socket
 import sys
@@ -10,11 +9,12 @@ import urllib2
 
 import googlesearch
 
+
 class TheHarvester:
 
     def __init__(self, active, dataSource, domain, searchMax, saveEmails, delay, urlTimeout):
         self.active = active
-        self.dataSource = dataSource
+        self.dataSource = dataSource.lower()
         self.domain = domain
         
         self.searchMax = searchMax
@@ -31,7 +31,6 @@ class TheHarvester:
         socket.setdefaulttimeout(self.urlTimeout)
 
     def go(self):
-        
         if self.dataSource == "all":
             self.google_search()  
             self.pgp_search()
@@ -64,7 +63,7 @@ class TheHarvester:
         if emails:
             for e in emails:
                 self.allEmails.append(e)
-        '''
+
         # Search for emails not within the domain's site (-site:<domain>)
         query = self.domain + " -site:" + self.domain
         print "[*] (PASSIVE) Searching for emails NOT within the domain's site: " + query
@@ -79,7 +78,7 @@ class TheHarvester:
                 self.find_emails(url)         
         else:
             print "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*." + self.domain + ")"
-        '''
+
     def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
         self.find_emails(url)
@@ -117,7 +116,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='theHarvester2')
     dataSources = ['all', 'google', 'pgp']
-    parser.add_argument('-a', dest='active', action='store_true', default=False, help='Conduct an active search (potentially scrape target domain and sub-domains)')
+    parser.add_argument('-a', dest='active', action='store_true', default=False, help='Conduct an active search (This could potentially scrape target domain and sub-domains)')
     parser.add_argument('-b', dest='dataSource', action='store', required=True, help='Specify data source (' + ', '.join(dataSources) + ')')
     parser.add_argument('-d', dest='domain', action='store', required=True, help='Domain to search')
     parser.add_argument('-l', dest='searchMax', action='store', type=int, default=100, help='Maximum results to search (default and minimum is 100)')
@@ -127,7 +126,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.dataSource not in dataSources: #"bing", "bing_api", "exalead", "google", "google_profiles", "jigsaw", "linkedin", "people123", "pgp", "yandex"):
+    if args.dataSource.lower() not in dataSources:
         print "[-] Invalid search engine...specify (" + ', '.join(dataSources) + ")"
         sys.exit()
     if not args.domain:
