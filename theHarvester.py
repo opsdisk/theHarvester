@@ -8,6 +8,7 @@ import sys
 import time
 import urllib2
 
+import googlesearch
 
 class TheHarvester:
 
@@ -56,21 +57,29 @@ class TheHarvester:
         # Retrieve pages based on domain search query
         print "[*] Searching for email addresses in " + str(self.searchMax) + " sites and waiting " + str(self.delay) + " seconds between searches"
         
+        # Search for emails based on the search string "@<DOMAIN>"
+        print "[*] (PASSIVE) Searching for emails in Google search results: @" + self.domain
+        googleResults = googlesearch.SearchGoogle(self.domain, self.searchMax, self.delay)
+        emails = googleResults.process()
+        if emails:
+            for e in emails:
+                self.allEmails.append(e)
+        '''
         # Search for emails not within the domain's site (-site:<domain>)
         query = self.domain + " -site:" + self.domain
-        print "[*] Searching for emails NOT within the domain's site (passive): " + query
+        print "[*] (PASSIVE) Searching for emails NOT within the domain's site: " + query
         for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
             self.find_emails(url)  
             
         # Search for emails within the domain's site (site:<domain>)
         if self.active:
             query = "site:" + self.domain
-            print "[*] Searching for emails within the domain's sites (active): " + self.domain
+            print "[*] (ACTIVE) Searching for emails within the domain's sites : " + self.domain
             for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
                 self.find_emails(url)         
         else:
             print "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*." + self.domain + ")"
-
+        '''
     def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
         self.find_emails(url)
