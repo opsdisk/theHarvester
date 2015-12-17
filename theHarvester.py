@@ -89,7 +89,7 @@ class TheHarvester:
             request = urllib2.Request(url)
             request.add_header('User-agent', 'Mozilla/5.0')
             response = urllib2.urlopen(request)
-            emails = re.findall(r"[a-z0-9_.+-]+@[a-z0-9-.]*." + self.domain, response.read(), re.I)
+            emails = re.findall(r"[a-z0-9_.+-]+@[a-z0-9-.]*" + self.domain, response.read(), re.I)
             if emails:
                 for e in emails:
                     self.allEmails.append(e)
