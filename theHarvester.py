@@ -57,7 +57,7 @@ class TheHarvester:
         print "[*] Searching for email addresses in " + str(self.searchMax) + " sites and waiting " + str(self.delay) + " seconds between searches"
         
         # Search for emails based on the search string "@<DOMAIN>"
-        print "[*] (PASSIVE) Searching for emails in Google search results: @" + self.domain
+        print "[*] (PASSIVE) Searching for emails in Google search results: @\"" + self.domain + "\""
         googleResults = googlesearch.SearchGoogle(self.domain, self.searchMax, self.delay)
         emails = googleResults.process()
         if emails:
