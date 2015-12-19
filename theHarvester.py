@@ -54,7 +54,7 @@ class TheHarvester:
 
     def google_search(self):
         # Retrieve pages based on domain search query
-        print "[*] Searching for email addresses in " + str(self.searchMax) + " sites and waiting " + str(self.delay) + " seconds between searches"
+        #print "[*] Searching for email addresses in " + str(self.searchMax) + " sites and waiting " + str(self.delay) + " seconds between searches"
         
         # Search for emails based on the search string "@<DOMAIN>"
         print "[*] (PASSIVE) Searching for emails in Google search results: @\"" + self.domain + "\""
@@ -73,7 +73,7 @@ class TheHarvester:
         # Search for emails within the domain's site (site:<domain>)
         if self.active:
             query = "site:" + self.domain
-            print "[*] (ACTIVE) Searching for emails within the domain's sites : " + self.domain
+            print "[*] (ACTIVE) Searching for emails within the domain's sites: " + self.domain
             for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
                 self.find_emails(url)         
         else:
@@ -82,14 +82,14 @@ class TheHarvester:
     def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
         self.find_emails(url)
-        
+    
     def find_emails(self, url):
         try:
             print "[+] Scraping any emails from: " + url
             request = urllib2.Request(url)
             request.add_header('User-agent', 'Mozilla/5.0')
             response = urllib2.urlopen(request)
-            emails = re.findall(r"[a-z0-9_.+-]+@[a-z0-9-.]*" + self.domain, response.read(), re.I)
+            emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + self.domain, response.read(), re.I)
             if emails:
                 for e in emails:
                     self.allEmails.append(e)
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', dest='domain', action='store', required=True, help='Domain to search')
     parser.add_argument('-l', dest='searchMax', action='store', type=int, default=100, help='Maximum results to search (default and minimum is 100)')
     parser.add_argument('-f', dest='saveEmails', action='store_true', default=False, help='Save the emails to emails_<TIMESTAMP>.txt file')
-    parser.add_argument('-e', dest='delay', action='store', type=float, default=7.0, help='Delay (in seconds) between searches.  If it\'s too small Google may block your IP, too big and your search may take a while.')
+    parser.add_argument('-e', dest='delay', action='store', type=float, default=7.0, help='Delay (in seconds) between searches.  If it\'s too small Google may block your IP, too big and your search may take a while (default 7).')
     parser.add_argument('-t', dest='urlTimeout', action='store', type=int, default=5, help='Number of seconds to wait before timeout for unreachable/stale pages (default 5)')
 
     args = parser.parse_args()
