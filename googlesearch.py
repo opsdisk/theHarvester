@@ -21,7 +21,7 @@ class SearchGoogle:
             time.sleep(self.delay)
             self.counter += 100
         self.clean_results()
-        emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + self.domain, self.totalresults, re.I)
+        emails = re.findall(r"[a-z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + self.domain, self.totalresults, re.I)
         return emails
 
     def do_search(self):
