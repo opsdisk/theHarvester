@@ -1,13 +1,36 @@
 #!/usr/bin/env python
 import argparse
 import google  # https://pypi.python.org/pypi/google
+import Queue
 import re
 import socket
 import sys
+import threading
 import time
 import urllib2
 
 import googlesearch
+
+class Worker(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        
+    def run(self):
+        while True:          
+            # Grab IP off the queue
+            url = th.queue.get()
+            try:
+                print "[+] Scraping any emails from: " + url
+                request = urllib2.Request(url)
+                request.add_header('User-agent', 'Mozilla/5.0')
+                response = urllib2.urlopen(request)
+                emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + th.domain, response.read(), re.I)
+                if emails:
+                    for e in emails:
+                        th.allEmails.append(e)
+            except:
+                print "[-] Timed out after " + str(self.urlTimeout) + " seconds...can't reach url: " + url 
 
 
 class TheHarvester:
@@ -30,7 +53,17 @@ class TheHarvester:
         
         socket.setdefaulttimeout(self.urlTimeout)
 
+        # Create queue and specify the number of worker threads.
+        self.queue = Queue.Queue()   
+        self.numWorkerThreads = 10
+
     def go(self):
+        # Kickoff the threadpool.
+        for i in range(self.numWorkerThreads):
+            thread = Worker()
+            thread.daemon = True
+            thread.start()
+
         if self.dataSource == "all":
             self.google_search()  
             self.pgp_search()
@@ -68,33 +101,20 @@ class TheHarvester:
         query = self.domain + " -site:" + self.domain
         print "[*] (PASSIVE) Searching for emails NOT within the domain's site: " + query
         for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
-            self.find_emails(url)  
+            self.queue.put(url)  
             
         # Search for emails within the domain's site (site:<domain>)
         if self.active:
             query = "site:" + self.domain
             print "[*] (ACTIVE) Searching for emails within the domain's sites: " + self.domain
             for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
-                self.find_emails(url)         
+                self.queue.put(url)         
         else:
             print "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*." + self.domain + ")"
 
     def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
         self.find_emails(url)
-    
-    def find_emails(self, url):
-        try:
-            print "[+] Scraping any emails from: " + url
-            request = urllib2.Request(url)
-            request.add_header('User-agent', 'Mozilla/5.0')
-            response = urllib2.urlopen(request)
-            emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + self.domain, response.read(), re.I)
-            if emails:
-                for e in emails:
-                    self.allEmails.append(e)
-        except:
-            print "[-] Timed out after " + str(self.urlTimeout) + " seconds...can't reach url: " + url
     
     def display_emails(self):
         if not self.allEmails:
