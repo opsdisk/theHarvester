@@ -24,13 +24,18 @@ class Worker(threading.Thread):
                 print "[+] Scraping any emails from: " + url
                 request = urllib2.Request(url)
                 request.add_header('User-agent', 'Mozilla/5.0')
-                response = urllib2.urlopen(request)
-                emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + th.domain, response.read(), re.I)
+                response = urllib2.urlopen(request).read()
+                for badchar in ('>', ':', '=', '<', '/', '\\', ';', '&', '%3A', '%3D', '%3C'):
+                    response = response.replace(badchar, ' ')
+                emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + th.domain, response, re.I)
                 if emails:
                     for e in emails:
                         th.allEmails.append(e)
             except:
-                print "[-] Timed out after " + str(self.urlTimeout) + " seconds...can't reach url: " + url 
+                #pass
+                print "[-] Timed out after " + str(th.urlTimeout) + " seconds...can't reach url: " + url 
+            
+            th.queue.task_done()
 
 
 class TheHarvester:
@@ -111,6 +116,8 @@ class TheHarvester:
                 self.queue.put(url)         
         else:
             print "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*." + self.domain + ")"
+        
+        th.queue.join()
 
     def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
