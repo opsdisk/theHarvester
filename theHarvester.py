@@ -11,6 +11,7 @@ import urllib2
 
 import googlesearch
 
+
 class Worker(threading.Thread):
 
     def __init__(self):
@@ -23,7 +24,10 @@ class Worker(threading.Thread):
             try:
                 print "[+] Scraping any emails from: " + url
                 request = urllib2.Request(url)
-                request.add_header('User-agent', 'Mozilla/5.0')
+                if th.randomizeUserAgent:
+                    request.add_header('User-agent', random.choice(th.userAgents))
+                else:
+                    request.add_header('User-agent', 'Mozilla/5.0')
                 response = urllib2.urlopen(request).read()
                 for badchar in ('>', ':', '=', '<', '/', '\\', ';', '&', '%3A', '%3D', '%3C'):
                     response = response.replace(badchar, ' ')
@@ -32,7 +36,6 @@ class Worker(threading.Thread):
                     for e in emails:
                         th.allEmails.append(e)
             except:
-                #pass
                 print "[-] Timed out after " + str(th.urlTimeout) + " seconds...can't reach url: " + url 
             
             th.queue.task_done()
@@ -40,7 +43,7 @@ class Worker(threading.Thread):
 
 class TheHarvester:
 
-    def __init__(self, active, dataSource, domain, searchMax, saveEmails, delay, urlTimeout):
+    def __init__(self, active, dataSource, domain, searchMax, saveEmails, delay, urlTimeout, numThreads, randomizeUserAgent):
         self.active = active
         self.dataSource = dataSource.lower()
         self.domain = domain
@@ -60,11 +63,17 @@ class TheHarvester:
 
         # Create queue and specify the number of worker threads.
         self.queue = Queue.Queue()   
-        self.numWorkerThreads = 10
+        self.numThreads = numThreads
+
+        self.randomizeUserAgent = randomizeUserAgent
+        if self.randomizeUserAgent:
+            with open('user_agents.txt') as uafh:
+                self.userAgents = uafh.readlines()
+            
 
     def go(self):
         # Kickoff the threadpool.
-        for i in range(self.numWorkerThreads):
+        for i in range(self.numThreads):
             thread = Worker()
             thread.daemon = True
             thread.start()
@@ -150,20 +159,22 @@ if __name__ == "__main__":
     parser.add_argument('-f', dest='saveEmails', action='store_true', default=False, help='Save the emails to emails_<TIMESTAMP>.txt file')
     parser.add_argument('-e', dest='delay', action='store', type=float, default=7.0, help='Delay (in seconds) between searches.  If it\'s too small Google may block your IP, too big and your search may take a while (default 7).')
     parser.add_argument('-t', dest='urlTimeout', action='store', type=int, default=5, help='Number of seconds to wait before timeout for unreachable/stale pages (default 5)')
+    parser.add_argument('-n', dest='numThreads', action='store', type=int, default=8, help='Number of search threads (default is 8)')
+    parser.add_argument('-r', dest='randomizeUserAgent', action='store_true', default=False, help='Randomize the user agent for each ACTIVE lookup (Default \'Mozilla/5.0\')')
 
     args = parser.parse_args()
 
     if args.dataSource.lower() not in dataSources:
         print "[-] Invalid search engine...specify (" + ', '.join(dataSources) + ")"
         sys.exit()
-    if not args.domain:
-        print "[!] Specify a domain (-d)"
-        sys.exit()
     if args.delay < 0:
         print "[!] Delay (-e) must be greater than 0"
         sys.exit()
     if args.urlTimeout < 0:
         print "[!] URL timeout (-t) must be greater than 0"
+        sys.exit()
+    if args.numThreads < 0:
+        print "[!] Number of threads (-n) must be greater than 0"
         sys.exit()
 
     #print vars(args)
