@@ -23,6 +23,8 @@ The `-f` switch writes all the emails to a `domain + date-time stamped` .txt fil
 
 The addition of the `-e` delay switch allows you to specify the time delay in seconds between searches.  If you request searches too quickly, Google will think you are a script or bot and will block your IP address for a while.  Experiment to see what works best for you.
 
+The `-n` switch specifies the amount of threads to use during active URL retrieval to search for email addresses, with the default being 8.
+
 Lastly, the `-t` switch specifies the amount of time to wait before trying to access a stale/defunct site in active search mode.
 
 #### Extracting Emails
