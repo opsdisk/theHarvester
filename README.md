@@ -26,11 +26,8 @@ The addition of the `-e` delay switch allows you to specify the time delay in se
 Lastly, the `-t` switch specifies the amount of time to wait before trying to access a stale/defunct site in active search mode.
 
 #### Extracting Emails
-The original theHarvester had a module to clean up HTML results in order to extract emails.  The email cleaning portion of that module is folded into the `googlesearch` module code.  The email regular expression has also been updated, since the old one would sometimes return erroneous results.  It is fairly basic for now, and would be fooled by addresses suchas `admin (at) example.com`
+The original theHarvester had a module to clean up HTML results in order to extract emails.  The email cleaning portion of that module is folded into the `googlesearch` module code.  The email regular expression is still the same. 
 
-```python
-emails = re.findall(r"[a-z0-9\.\-+_]+@[a-zA-Z0-9.-]*" + self.domain, response.read(), re.I)
-```
 #### Data Presentation
 The emails are converted to lowercase and sorted in alphabetical order for a cleaner look.
 
