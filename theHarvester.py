@@ -24,10 +24,6 @@ class Worker(threading.Thread):
             try:
                 print "[+] Scraping any emails from: " + url
                 request = urllib2.Request(url)
-                if th.randomizeUserAgent:
-                    request.add_header('User-agent', random.choice(th.userAgents))
-                else:
-                    request.add_header('User-agent', 'Mozilla/5.0')
                 response = urllib2.urlopen(request).read()
                 for badchar in ('>', ':', '=', '<', '/', '\\', ';', '&', '%3A', '%3D', '%3C'):
                     response = response.replace(badchar, ' ')
@@ -64,12 +60,6 @@ class TheHarvester:
         # Create queue and specify the number of worker threads.
         self.queue = Queue.Queue()   
         self.numThreads = numThreads
-
-        self.randomizeUserAgent = randomizeUserAgent
-        if self.randomizeUserAgent:
-            with open('user_agents.txt') as uafh:
-                self.userAgents = uafh.readlines()
-            
 
     def go(self):
         # Kickoff the threadpool.
@@ -160,7 +150,6 @@ if __name__ == "__main__":
     parser.add_argument('-e', dest='delay', action='store', type=float, default=7.0, help='Delay (in seconds) between searches.  If it\'s too small Google may block your IP, too big and your search may take a while (default 7).')
     parser.add_argument('-t', dest='urlTimeout', action='store', type=int, default=5, help='Number of seconds to wait before timeout for unreachable/stale pages (default 5)')
     parser.add_argument('-n', dest='numThreads', action='store', type=int, default=8, help='Number of search threads (default is 8)')
-    parser.add_argument('-r', dest='randomizeUserAgent', action='store_true', default=False, help='Randomize the user agent for each ACTIVE lookup (Default \'Mozilla/5.0\')')
 
     args = parser.parse_args()
 
