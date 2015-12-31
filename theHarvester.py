@@ -39,7 +39,7 @@ class Worker(threading.Thread):
 
 class TheHarvester:
 
-    def __init__(self, active, dataSource, domain, searchMax, saveEmails, delay, urlTimeout, numThreads, randomizeUserAgent):
+    def __init__(self, active, dataSource, domain, searchMax, saveEmails, delay, urlTimeout, numThreads):
         self.active = active
         self.dataSource = dataSource.lower()
         self.domain = domain
