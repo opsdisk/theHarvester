@@ -104,23 +104,23 @@ class TheHarvester:
         # Search for emails not within the domain's site (-site:<domain>)
         query = self.domain + " -site:" + self.domain
         print "[*] (PASSIVE) Searching for emails NOT within the domain's site: " + query
-        for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
+        for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay, extra_params={'filter': '0'}):
             self.queue.put(url)  
             
         # Search for emails within the domain's site (site:<domain>)
         if self.active:
             query = "site:" + self.domain
             print "[*] (ACTIVE) Searching for emails within the domain's sites: " + self.domain
-            for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay):
+            for url in google.search(query, start=0, stop=self.searchMax, num=self.numMax, pause=self.delay, extra_params={'filter': '0'}):
                 self.queue.put(url)         
         else:
             print "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*." + self.domain + ")"
         
         th.queue.join()
 
-    def pgp_search(self):
+    '''def pgp_search(self):
         url = "https://pgp.mit.edu/pks/lookup?search=" + self.domain + "&op=index"       
-        self.find_emails(url)
+        self.find_emails(url)'''
     
     def display_emails(self):
         if not self.allEmails:
@@ -141,8 +141,8 @@ def get_timestamp():
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='theHarvester2')
-    dataSources = ['all', 'google', 'pgp']
-    parser.add_argument('-a', dest='active', action='store_true', default=False, help='Conduct an active search (This could potentially scrape target domain and sub-domains)')
+    dataSources = ['all', 'google']  # , 'pgp']
+    parser.add_argument('-a', dest='active', action='store_true', default=False, help='Conduct an active search.  This could potentially scrape target domain and sub-domains from your IP (default is false)')
     parser.add_argument('-b', dest='dataSource', action='store', required=True, help='Specify data source (' + ', '.join(dataSources) + ')')
     parser.add_argument('-d', dest='domain', action='store', required=True, help='Domain to search')
     parser.add_argument('-l', dest='searchMax', action='store', type=int, default=100, help='Maximum results to search (default and minimum is 100)')
