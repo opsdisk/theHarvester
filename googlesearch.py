@@ -14,7 +14,7 @@ class SearchGoogle:
         self.totalresults = ""
         self.counter = 0
         self.quantity = "100"
-        
+
     def process(self):
         while self.counter <= self.limit:
             self.do_search()
@@ -30,8 +30,8 @@ class SearchGoogle:
             r = requests.get(url)
         except Exception, e:
             print e
-        
-        self.results = r.content 
+
+        self.results = r.content
         self.totalresults += self.results
 
     def clean_results(self):
