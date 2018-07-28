@@ -37,9 +37,7 @@ class Worker(threading.Thread):
 
                 headers = {"User-Agent": "Googlebot/2.1 (+http://www.google.com/bot.html"}
 
-                # request = urllib2.Request(url)
                 response = requests.get(url, headers=headers, verify=False, timeout=th.url_timeout)
-                # response = urllib2.urlopen(request).read()
                 
                 if response.status_code == 200:
                     response_text = response.text
@@ -126,6 +124,7 @@ class theHarvester:
         # Search for emails within the domain's site (site:<domain>).
         if self.active:
             query = "site:{}".format(self.domain)
+
             print("[*] (ACTIVE) Searching for emails within the domain's sites: {}".format(self.domain))
             for url in googlesearch.search(
                 query,
