@@ -3,19 +3,19 @@
 import argparse
 import queue
 import re
-import socket
 import sys
 import threading
 import time
 
 # https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho#28002687
 import urllib3
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # Third party Python libraries.
 import googlesearch  # noqa
-import requests
+import requests  # noqa
 
 # Custom Python libraries.
 
@@ -38,12 +38,12 @@ class Worker(threading.Thread):
                 headers = {"User-Agent": "Googlebot/2.1 (+http://www.google.com/bot.html"}
 
                 response = requests.get(url, headers=headers, verify=False, timeout=th.url_timeout)
-                
+
                 if response.status_code == 200:
                     response_text = response.text
                     for badchar in (">", ":", "=", "<", "/", "\\", ";", "&", "%3A", "%3D", "%3C"):
                         response_text = response_text.replace(badchar, " ")
-                    
+
                     emails = re.findall(r"[a-zA-Z0-9.-_]*@(?:[a-z0-9.-]*\.)?" + th.domain, response_text, re.I)
                     if emails:
                         for e in emails:
@@ -82,7 +82,7 @@ class theHarvester:
 
     def go(self):
         # Kickoff the threadpool.
-        for i in range(self.num_threads):
+        for i in range(self.num_threads):  # noqa
             thread = Worker()
             thread.daemon = True
             thread.start()
@@ -205,7 +205,7 @@ if __name__ == "__main__":
         action="store",
         type=float,
         default=7.0,
-        help="""Delay (in seconds) between searches.  If it's too small Google may block your IP, too big and your search 
+        help="""Delay (in seconds) between searches.  If it's too small Google may block your IP, too big and your search
         may take a while (Default: 7.0).""",
     )
     parser.add_argument(

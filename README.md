@@ -7,7 +7,9 @@ One of the most popular tools to collect email addresses and other target inform
 
 Clone the git repository and install the requirements.
 
-    pip3 install -r requirements.txt
+```bash
+pip3 install -r requirements.txt
+```
 
 #### theHarvester Collection Modes
 
@@ -64,4 +66,3 @@ Not sure if I will add the other search engine functionality (Yahoo!, Baidu), th
 #### Conclusion
 
 All of the code can be found on the Opsdisk Github repository here: https://github.com/opsdisk/theHarvester.  Comments, suggestions, and improvements are always welcome.  Be sure to follow [@opsdisk](https://twitter.com/opsdisk) on Twitter for the latest updates.
- 
