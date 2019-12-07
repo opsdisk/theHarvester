@@ -139,7 +139,7 @@ class theHarvester:
 
         else:
             print(
-                "[*] Active seach (-a) not specified, skipping searching for emails within the domain's sites (*.{})".format(
+                "[*] Active search (-a) not specified, skipping searching for emails within the domain's sites (*.{})".format(
                     self.domain
                 )
             )
